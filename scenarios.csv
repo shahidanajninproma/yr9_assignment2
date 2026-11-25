@@ -1,0 +1,4 @@
+id,label,delay,gamma,undated_gw,drivers,assumption_note
+roadmap,Roadmap delivered,0,1,8.8,"Permits, grid connections and the CfD scheme from 2027 arrive on time; undated sites are tendered and built.","ILLUSTRATIVE: 8.8 GW undated is the team's assumption, sized to the gap the dated pipeline leaves to 21 GW."
+delayed,Delayed build-out,1,1,2.0,"Grid-connection and component lead times push every dated site back a year; few undated sites reach commissioning by 2032.","ILLUSTRATIVE: 1-year delay and 2.0 GW undated are team assumptions."
+squeeze,Cost squeeze,2,0,0.0,"Rising costs and weak demand stall tenders (Nederwiek I-A drew no applications): 2-year delays, Gamma tender fails, no undated build by 2032.","ILLUSTRATIVE: 2-year delay, Gamma failure and 0 GW undated are team assumptions."

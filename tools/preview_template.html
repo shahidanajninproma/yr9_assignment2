@@ -1,0 +1,117 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dutch offshore wind to 2032 (offline preview)</title>
+<style>:root{--bg:#090f1e;--panel:#111c31;--bd:#25354e;--tx:#edf5ff;--mu:#96a9c5;--bl:#54b8fa;--te:#40d7b0;--go:#f0bb65}
+*{box-sizing:border-box}body{font:14px/1.5 Inter,system-ui,Segoe UI,sans-serif;margin:0;background:var(--bg);color:var(--tx)}
+header{padding:22px clamp(14px,3vw,40px) 6px}.kick{color:var(--te);letter-spacing:2.2px;font-weight:800;font-size:10px;text-transform:uppercase}
+h1{font-size:clamp(22px,3vw,34px);letter-spacing:-1px;margin:6px 0}h3{margin:6px 0 10px}h4{margin:14px 0 6px}p{color:var(--mu)}
+.snap{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.pill{border:1px solid var(--bd);background:#122039;border-radius:100px;padding:4px 11px;color:#bcd0e8;font-size:12px}
+.pill.ok{border-color:#1c786a;background:#123b3a;color:#83edd3}.pill.warn{border-color:#625b38;background:#30291a;color:#f5d99c}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:6px clamp(14px,3vw,40px)}
+.kpi{background:linear-gradient(160deg,#142139,#101b2f);border:1px solid var(--bd);border-radius:17px;padding:14px 18px}.kpi small{display:block;color:var(--mu);text-transform:uppercase;font-size:11px;letter-spacing:.5px}
+.kpi b{font-size:clamp(20px,2.2vw,30px);letter-spacing:-1px}.kpi i{display:block;font-style:normal;font-size:11px;color:#92a9c5}
+main{display:flex;flex-wrap:wrap;padding:6px clamp(14px,3vw,40px)}aside{width:270px;padding:14px;background:#0c1628;border:1px solid var(--bd);border-radius:14px;margin:8px 16px 8px 0;align-self:flex-start}
+section{flex:1;min-width:320px;padding:8px 0}nav button{margin:2px;padding:8px 12px;border:1px solid var(--bd);border-radius:9px;background:#122039;color:#c8d9ee;cursor:pointer}nav button.on{background:#1d304c;color:#fff;box-shadow:inset 0 -3px var(--te)}
+.m{display:inline-block;margin:4px 10px 4px 0;padding:10px 14px;background:#122039;border:1px solid var(--bd);border-radius:12px;color:var(--mu)}.m b{display:block;font-size:20px;color:var(--tx)}
+.info{background:#12294a;border:1px solid #1f4170;padding:9px 13px;border-radius:10px;margin:8px 0}.act{background:#123b3a;border:1px solid #1c786a;padding:9px 13px;border-radius:10px;margin:8px 0}
+.warn{background:#30291a;border:1px solid #625b38;color:#f5d99c;padding:7px 11px;border-radius:10px;margin:8px 0}.panel{background:linear-gradient(160deg,#142139,#101b2f);border:1px solid var(--bd);border-radius:14px;padding:12px 16px;margin:8px 0}
+table{border-collapse:collapse;font-size:12.5px;display:block;overflow-x:auto}td,th{border-bottom:1px solid #26374e;padding:6px 8px;text-align:left}th{color:#a0b5cd}
+svg{max-width:100%;height:auto;background:rgba(255,255,255,.01);border-radius:12px}svg text{fill:#9aacbf}svg text[font-weight=bold]{fill:#edf5ff}svg line[stroke="#ddd"]{stroke:#25354e}
+a{color:#85d5ff}label{display:block;margin-top:8px;color:var(--mu)}button.dl{padding:8px 12px;border-radius:9px;border:1px solid #287c77;background:#1c5b5c;color:#e0fff4;cursor:pointer;margin:4px 6px 4px 0}
+footer{padding:14px clamp(14px,3vw,40px);font-size:11px;color:#7b93ae}@media(max-width:800px){.kpis{grid-template-columns:repeat(2,1fr)}aside{width:100%}}</style></head><body>
+<header><div class="kick">Dutch renewable energy intelligence · WINDSCOPE</div><h1>Should a supplier invest in Dutch offshore wind capacity to 2032?</h1><div class="snap" id="snap"></div></header>
+<div class="kpis" id="kpis"></div><main><aside id="side"></aside><section><nav id="nav"></nav><div id="out"></div></section></main><footer id="foot"></footer>
+<script>
+const D=/*DATA*/null;
+//--CORE--
+const BASE_YEAR=2025,END_YEAR=2032,UW=[2030,2031,2032];
+const T975=[12.706,4.303,3.182,2.776,2.571,2.447,2.365,2.306,2.262,2.228,2.201,2.179,2.160,2.145,2.131,2.120,2.110,2.101,2.093,2.086,2.080,2.074,2.069,2.064,2.060,2.056,2.052,2.048,2.045,2.042];
+function pipelineSplit(P){let d=0,u=0;for(const r of P){if(r.year===null)u+=r.gw*1000;else d+=r.gw*1000}return[d,u]}
+function scenarioPath(P,base,delay,gamma,uw){const years=[];for(let y=BASE_YEAR;y<=END_YEAR;y++)years.push(y);
+ const add=Object.fromEntries(years.map(y=>[y,0]));
+ for(const r of P){if(r.year===null||(!gamma&&r.tender===1))continue;const y=r.year+delay;if(y in add)add[y]+=r.gw*1000}
+ let dated=0;for(const y of years)dated+=add[y];
+ for(const y of UW)add[y]+=uw*1000/UW.length;
+ let c=base;const cum=years.map(y=>(c+=add[y]));return{years,add:years.map(y=>add[y]),cum,base,dated}}
+function metrics(p,target,uw){const i0=p.years.indexOf(BASE_YEAR+1);let pk=-1,pv=0,z=0;
+ for(let i=i0;i<p.years.length;i++){if(p.add[i]>pv){pv=p.add[i];pk=p.years[i]}if(p.add[i]<=1e-9)z++}
+ const cap=p.cum[p.cum.length-1];let ty=null;for(let i=0;i<p.years.length;i++)if(p.cum[i]>=target-1e-9){ty=p.years[i];break}
+ return{cap2032_mw:cap,gap_mw:Math.max(target-cap,0),target_year:ty,peak_year:pv>0?pk:null,peak_mw:pv,zero_years:z,mw_added:cap-p.base,dated_mw:p.dated,undated_mw:uw*1000}}
+function fillText(t,m,target){const v={cap2032:(m.cap2032_mw/1000).toFixed(1)+" GW",gap:(m.gap_mw/1000).toFixed(1)+" GW",year:m.target_year?String(m.target_year):"not reached by 2032",
+ peak_year:m.peak_year?String(m.peak_year):"none",peak:(m.peak_mw/1000).toFixed(1)+" GW",zero:String(m.zero_years),target:(target/1000).toFixed(0)+" GW",
+ dated:(m.dated_mw/1000).toFixed(1)+" GW",undated:(m.undated_mw/1000).toFixed(1)+" GW"};for(const k in v)t=t.split("{"+k+"}").join(v[k]);return t}
+function linearForecast(x,y,end){const n=x.length,xb=x.reduce((a,b)=>a+b)/n,yb=y.reduce((a,b)=>a+b)/n;let sxx=0,sxy=0;
+ for(let i=0;i<n;i++){sxx+=(x[i]-xb)**2;sxy+=(x[i]-xb)*(y[i]-yb)}const b=sxy/sxx,a=yb-b*xb;let ss=0;for(let i=0;i<n;i++)ss+=(y[i]-(a+b*x[i]))**2;
+ const s=Math.sqrt(ss/(n-2)),t=(n-2<=T975.length)?T975[n-3]:1.96,rows=[];
+ for(let yr=Math.max(...x)+1;yr<=end;yr++){const mid=a+b*yr,h=t*s*Math.sqrt(1+1/n+(yr-xb)**2/sxx);rows.push({year:yr,forecast_mw:mid,lo_mw:mid-h,hi_mw:mid+h})}return{rows,slope:b,s}}
+function holdout(H,te0,start){const tr=H.filter(r=>r.year>=start&&r.year<=te0),te=H.filter(r=>r.year>te0);
+ const f=linearForecast(tr.map(r=>r.year),tr.map(r=>r.offshore_mw),Math.max(...te.map(r=>r.year)));const last=tr[tr.length-1].offshore_mw;
+ const out=te.map((r,i)=>{const q=f.rows[i];return{year:r.year,actual_mw:r.offshore_mw,forecast_mw:q.forecast_mw,lo_mw:q.lo_mw,hi_mw:q.hi_mw,naive_mw:last,inside:r.offshore_mw>=q.lo_mw&&r.offshore_mw<=q.hi_mw}});
+ const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+ return{out,mae_linear:mean(out.map(o=>Math.abs(o.forecast_mw-o.actual_mw))),mae_naive:mean(out.map(o=>Math.abs(o.naive_mw-o.actual_mw))),coverage:mean(out.map(o=>o.inside?1:0))}}
+//--/CORE--
+if(typeof document!=="undefined"&&D){
+const $=id=>document.getElementById(id),OBS="#54b8fa",FC="#f0bb65",SCN="#40d7b0",H=D.hist,BASE=H.find(r=>r.year===2025).offshore_mw;
+const S={preset:D.scen[0].id,delay:D.scen[0].delay,gamma:!!D.scen[0].gamma,uw:D.scen[0].undated_gw,target:21,tab:0};
+const TABS=["Supplier lens","Scenarios","Developer lens","Policymaker lens","Forecast","History","Context","Summary","Data & sources"];
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const md=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\*(.+?)\*/g,"<i>$1</i>").split(/\n\n+/).map(p=>p.startsWith("### ")?"<h4>"+p.slice(4).split("\n")[0]+"</h4>"+md2(p.split("\n").slice(1).join("\n")):md2(p)).join("");
+const md2=p=>/^- /m.test(p)?"<ul>"+p.split("\n").filter(l=>l.startsWith("- ")).map(l=>"<li>"+l.slice(2)+"</li>").join("")+"</ul>":"<p>"+p+"</p>";
+const fmt=n=>Math.round(n).toLocaleString("en-US");
+function table(rows,cols){return"<table><tr>"+cols.map(c=>"<th>"+c+"</th>").join("")+"</tr>"+rows.map(r=>"<tr>"+cols.map(c=>"<td>"+esc(r[c]===null||r[c]===undefined?"":r[c])+"</td>").join("")+"</tr>").join("")+"</table>"}
+function chart(o){const W=720,Hh=340,m={l:62,r:14,t:30,b:76},xs=[...new Set(o.s.flatMap(s=>s.x))].sort((a,b)=>a-b);
+ const all=o.s.flatMap(s=>s.y.concat(s.y2||[]).concat(s.type==="bar"?[0]:[]));if(o.hline)all.push(o.hline);const ymax=Math.max(...all)*1.08,ymin=Math.min(0,...all);
+ const X=v=>m.l+(xs.indexOf(v)+.5)/xs.length*(W-m.l-m.r),Y=v=>Hh-m.b-(v-ymin)/(ymax-ymin)*(Hh-m.t-m.b),bw=(W-m.l-m.r)/xs.length*.7/(o.s.filter(s=>s.type==="bar").length||1);
+ let g=`<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${esc(o.title)}"><text x="${m.l}" y="18" font-weight="bold">${esc(o.title)}</text><text x="12" y="${Hh/2}" transform="rotate(-90 12 ${Hh/2})" text-anchor="middle" font-size="11">${esc(o.unit)}</text>`;
+ for(let i=0;i<=4;i++){const v=ymin+(ymax-ymin)*i/4;g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#ddd"/><text x="${m.l-4}" y="${Y(v)+4}" text-anchor="end" font-size="10">${fmt(v)}</text>`}
+ xs.forEach((v,i)=>{if(i%(xs.length>14?2:1)===0)g+=`<text x="${X(v)}" y="${Hh-m.b+14}" text-anchor="middle" font-size="10">${v}</text>`});
+ let bi=0;for(const s of o.s){if(s.type==="band"){g+=`<polygon fill="rgba(240,187,101,.2)" points="${s.x.map((x,i)=>X(x)+","+Y(s.y2[i])).join(" ")+" "+s.x.map((x,i)=>i).reverse().map(i=>X(s.x[i])+","+Y(s.y[i])).join(" ")}"/>`}
+  else if(s.type==="bar"){const k=bi++,nb=o.s.filter(t=>t.type==="bar").length;s.x.forEach((x,i)=>{g+=`<rect x="${X(x)-bw*nb/2+k*bw}" y="${Y(Math.max(s.y[i],0))}" width="${bw}" height="${Math.abs(Y(s.y[i])-Y(0))}" fill="${s.c}"/>`})}
+  else g+=`<polyline fill="none" stroke="${s.c}" stroke-width="${s.w||2}" ${s.d?'stroke-dasharray="6 4"':""} points="${s.x.map((x,i)=>X(x)+","+Y(s.y[i])).join(" ")}"/>`}
+ if(o.hline)g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(o.hline)}" y2="${Y(o.hline)}" stroke="#8aa0bd" stroke-dasharray="2 3"/><text x="${W-m.r}" y="${Y(o.hline)-4}" text-anchor="end" font-size="10">Target ${fmt(o.hline)} MW</text>`;
+ let lx=m.l;for(const s of o.s.filter(s=>s.n)){g+=`<rect x="${lx}" y="${Hh-44}" width="10" height="10" fill="${s.c}"/><text x="${lx+14}" y="${Hh-35}" font-size="11">${esc(s.n)}</text>`;lx+=24+s.n.length*6.3}
+ return g+`<text x="${m.l}" y="${Hh-12}" font-size="10" fill="#555">Source: ${esc(o.src)}</text></svg>`}
+const prow=()=>D.scen.find(s=>s.id===S.preset);
+function compute(){S.path=scenarioPath(D.pipe,BASE,S.delay,S.gamma,S.uw);S.m=metrics(S.path,S.target*1000,S.uw)}
+const M_=(l,v)=>`<div class="m">${l}<b>${v}</b></div>`;
+const lensT=l=>{const r=D.lens.find(x=>x.lens===l&&x.scenario===S.preset);return`<div class="info">${esc(fillText(r.readout,S.m,S.target*1000))}</div><div class="act"><b>Action:</b> ${esc(fillText(r.action,S.m,S.target*1000))}</div>`};
+const SRC_CAP="CBS StatLine 82610ENG (CC BY 4.0)",SRC_RVO="RVO Offshore Wind Energy Roadmap (May 2026)";
+function cumChart(fc){const p=S.path,i0=0,s=[{n:"Observed (CBS)",c:OBS,x:H.map(r=>r.year),y:H.map(r=>r.offshore_mw)},{n:"Scenario (assumption)",c:SCN,w:3,x:p.years,y:p.cum}];
+ if(fc){const h=H.filter(r=>r.year>=2015),f=linearForecast(h.map(r=>r.year),h.map(r=>r.offshore_mw),END_YEAR);s.push({n:"Linear trend (model)",c:FC,d:1,x:f.rows.map(r=>r.year),y:f.rows.map(r=>r.forecast_mw)})}
+ return chart({title:"Offshore capacity: observed vs scenario",unit:"MW installed, end of year",src:SRC_CAP+"; "+SRC_RVO+"; scenario = team assumptions",s,hline:S.target*1000})}
+const R=[
+()=>{const m=S.m,oa=H.slice(1).map((r,i)=>({y:r.year,a:r.offshore_mw-H[i].offshore_mw})),p=S.path;
+ return`<h3>Supplier: invest in Dutch capacity to 2032?</h3>`+M_("MW added per year (avg 2026-32)",fmt(m.mw_added/7))+M_("Busiest year",m.peak_year?m.peak_year+" ("+fmt(m.peak_mw)+" MW)":"none")+M_("Zero-build years (of 7)",m.zero_years)+lensT("supplier")+
+ chart({title:"Capacity added per year",unit:"MW added in year",src:SRC_CAP+"; "+SRC_RVO+"; scenario = team assumptions",s:[{n:"Observed additions (CBS)",type:"bar",c:OBS,x:oa.map(o=>o.y),y:oa.map(o=>o.a)},{n:"Scenario additions (assumption)",type:"bar",c:SCN,x:p.years.slice(1),y:p.add.slice(1)}]})},
+()=>"<h3>Scenarios</h3>"+cumChart(true)+table(D.scen,["label","delay","gamma","undated_gw","drivers","assumption_note"])+"<p>RVO pipeline</p>"+table(D.pipe.map(r=>({...r,included_2032:r.year!==null&&r.year+S.delay<=2032&&(r.tender===0||S.gamma)})),["site","gw","commissioning_text","year","included_2032"]),
+()=>{const m=S.m,[d,u]=pipelineSplit(D.pipe),x=["RVO roadmap (all sites)","Selected scenario"];
+ return`<h3>Developer: bid in tenders or not?</h3>`+M_("Dated pipeline in window",fmt(m.dated_mw)+" MW")+M_("Undated assumed built",fmt(m.undated_mw)+" MW")+M_("Undated share of additions",m.mw_added?Math.round(m.undated_mw/m.mw_added*100)+"%":"n/a")+lensT("developer")+
+ chart({title:"Dated vs undated pipeline (MW)",unit:"MW",src:SRC_RVO+"; scenario = team assumptions",s:[{n:"Dated sites (RVO) | undated sites",type:"bar",c:OBS,x:[1,2],y:[d,m.dated_mw]},{type:"bar",c:SCN,x:[1,2],y:[u,m.undated_mw]}]})+"<p>Bars: blue = dated, green = undated; left pair = whole RVO roadmap, right pair = selected scenario.</p>"},
+()=>{const m=S.m;return`<h3>Policymaker: will the target be reached by 2032?</h3>`+M_("Capacity end-2032",(m.cap2032_mw/1000).toFixed(1)+" GW")+M_("Gap to "+S.target+" GW",(m.gap_mw/1000).toFixed(1)+" GW")+M_("Year target reached",m.target_year||"Not by 2032")+lensT("policymaker")+cumChart(false)},
+()=>{const h=H.filter(r=>r.year>=2015),f=linearForecast(h.map(r=>r.year),h.map(r=>r.offshore_mw),END_YEAR),ty=S.hold||2021,ho=holdout(H,ty,2015);
+ return"<h3>Forecast and validation</h3>"+chart({title:"Linear trend 2015-2025 extended to 2032",unit:"MW installed",src:SRC_CAP+"; OLS (same logic as model.py)",s:[{type:"band",x:f.rows.map(r=>r.year),y:f.rows.map(r=>r.lo_mw),y2:f.rows.map(r=>r.hi_mw)},{n:"Observed (CBS)",c:OBS,x:h.map(r=>r.year),y:h.map(r=>r.offshore_mw)},{n:"Linear trend (model), shaded ~95% band",c:FC,d:1,x:f.rows.map(r=>r.year),y:f.rows.map(r=>r.forecast_mw)}]})+md(D.md.forecast_note)+
+ `<label>Holdout: train to year <b>${ty}</b> <input id="hold" type="range" min="2018" max="2024" value="${ty}"></label>`+M_("MAE linear (MW)",fmt(ho.mae_linear))+M_("MAE naive last value (MW)",fmt(ho.mae_naive))+M_("Actuals inside band",Math.round(ho.coverage*100)+"%")+
+ chart({title:`Holdout test: train 2015-${ty}, test ${ty+1}-2025`,unit:"MW installed",src:SRC_CAP,s:[{n:"Actual (CBS)",c:OBS,x:H.filter(r=>r.year>=2015).map(r=>r.year),y:H.filter(r=>r.year>=2015).map(r=>r.offshore_mw)},{n:"Linear (trained to holdout)",c:FC,d:1,x:ho.out.map(o=>o.year),y:ho.out.map(o=>o.forecast_mw)},{n:"Naive last value",c:"#888",d:1,x:ho.out.map(o=>o.year),y:ho.out.map(o=>o.naive_mw)}]})+"<p><i>Few test points and step-like data: indicative only.</i></p>"},
+()=>"<h3>History</h3>"+chart({title:"Wind capacity, Netherlands",unit:"MW, end of year",src:SRC_CAP+" (2024-25 provisional)",s:[{n:"Offshore capacity",c:OBS,x:H.map(r=>r.year),y:H.map(r=>r.offshore_mw)},{n:"Onshore capacity",c:"#777",x:H.map(r=>r.year),y:H.map(r=>r.onshore_mw)}]})+chart({title:"Offshore gross electricity production",unit:"mln kWh",src:SRC_CAP,s:[{n:"Offshore production",type:"bar",c:OBS,x:H.map(r=>r.year),y:H.map(r=>r.offshore_prod_mln_kwh)}]}),
+()=>"<h3>Context: PESTLE and Porter's Diamond</h3>"+md(D.md.context_intro)+"<h4>PESTLE</h4>"+table(D.pestle.filter(r=>r.framework==="PESTLE"),["factor","driver","indicator","source_id"])+"<h4>Porter's Diamond</h4>"+table(D.pestle.filter(r=>r.framework==="Diamond"),["factor","driver","indicator","source_id"]),
+()=>"<h3>Summary</h3>"+md(D.md.summary)+`<div class="act">${esc(D.lens.find(r=>r.lens==="no_regret").action)}</div>`,
+()=>{const snap=D.src.map(r=>r.access_date).sort().pop();return"<h3>Data snapshot and sources</h3><div class='panel'><b>Snapshot, not live.</b> Data downloaded "+snap+" and embedded in this file. CBS 2024-2025 values are provisional. Scenario inputs are team assumptions, kept apart from observed data.</div>"+
+ D.src.map(r=>`<div class="panel"><b>${esc(r.dataset)}</b> <span class="pill">${esc(r.table)}</span> <span class="pill">${esc(r.licence)}</span><p><b>Variables:</b> ${esc(r.variables)} · <b>Units:</b> ${esc(r.units)} · <b>Coverage:</b> ${esc(r.coverage)} · <b>Accessed:</b> ${esc(r.access_date)}</p><p><b>Missing:</b> ${esc(r.missing_values)}</p><p><b>Transformations:</b> ${esc(r.transformations)}</p><p><a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.url)} ↗</a></p></div>`).join("")+
+ `<button class="dl" onclick="dl('cbs_82610ENG_wind_snapshot.csv',D.hist)">↓ CBS history (CSV)</button><button class="dl" onclick="dl('rvo_pipeline_snapshot.csv',D.pipe)">↓ RVO pipeline (CSV)</button>`+md(D.md.method)+table(H.map(r=>({...r,status:r.provisional?"provisional":"final"})),["year","offshore_mw","onshore_mw","offshore_prod_mln_kwh","status"])}];
+function side(){const r=prow(),custom=S.delay!==r.delay||S.gamma!==!!r.gamma||Math.abs(S.uw-r.undated_gw)>.05;
+ $("side").innerHTML="<b>Scenario (drives every tab)</b>"+D.scen.map(s=>`<label><input type="radio" name="p" value="${s.id}" ${s.id===S.preset?"checked":""}> ${s.label}</label>`).join("")+
+ `<label>Delay to dated sites: <b>${S.delay}</b> yr<input id="d" type="range" min="0" max="3" value="${S.delay}"></label><label><input id="g" type="checkbox" ${S.gamma?"checked":""}> Gamma-A/B tender succeeds</label>`+
+ `<label>Undated GW built 2030-32: <b>${S.uw.toFixed(1)}</b><input id="u" type="range" min="0" max="11.4" step="0.1" value="${S.uw}"></label><label>Target (GW) <input id="t" type="number" step="0.5" value="${S.target}" style="width:60px"></label>`+
+ (custom?`<div class="warn">Custom: sliders differ from the preset. Lens text is the preset's; numbers are live.</div>`:"")+`<p style="font-size:12px">Assumptions are illustrative (team assumptions), not data.</p>`}
+function dl(n,rows){const k=Object.keys(rows[0]),c=[k.join(","),...rows.map(r=>k.map(x=>JSON.stringify(r[x]===null?"":r[x])).join(","))].join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([c],{type:"text/csv"}));a.download=n;a.click()}
+function chrome(){const snap=D.src.map(r=>r.access_date).sort().pop(),l=H[H.length-1],tot=l.offshore_mw+l.onshore_mw,m=S.m;
+ $("snap").innerHTML=`<span class="pill ok">Snapshot, not live · accessed ${snap}</span><span class="pill">CBS StatLine 82610ENG · 2006-2025</span><span class="pill">RVO Offshore Wind Roadmap · May 2026</span><span class="pill warn">2024-2025 provisional</span><span class="pill">Scenarios = assumptions</span>`;
+ const k=[["Total wind installed, 2025",(tot/1000).toFixed(2)+" GW","Observed · CBS · provisional"],["Offshore, 2025",(l.offshore_mw/1000).toFixed(2)+" GW",(100*l.offshore_mw/tot).toFixed(1)+"% of total · observed"],["Onshore, 2025",(l.onshore_mw/1000).toFixed(2)+" GW",(100*l.onshore_mw/tot).toFixed(1)+"% of total · observed"],["Offshore end-2032 (scenario)",(m.cap2032_mw/1000).toFixed(1)+" GW","gap to "+S.target+" GW: "+(m.gap_mw/1000).toFixed(1)+" GW · assumption"]];
+ $("kpis").innerHTML=k.map(x=>`<div class="kpi"><small>${x[0]}</small><b>${x[1]}</b><i>${x[2]}</i></div>`).join("");
+ $("foot").textContent="WINDSCOPE · university project (Turku School of Economics, BI 2026) · CBS 82610ENG · RVO Roadmap May 2026 · snapshot "+snap+" · not investment advice"}
+function draw(){compute();side();chrome();$("nav").innerHTML=TABS.map((t,i)=>`<button class="${i===S.tab?"on":""}" data-i="${i}">${t}</button>`).join("");$("out").innerHTML=R[S.tab]();wire()}
+function wire(){document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{S.tab=+b.dataset.i;draw()});
+ document.querySelectorAll('input[name=p]').forEach(r=>r.onchange=()=>{S.preset=r.value;const p=prow();S.delay=p.delay;S.gamma=!!p.gamma;S.uw=p.undated_gw;draw()});
+ $("d").oninput=e=>{S.delay=+e.target.value;draw()};$("g").onchange=e=>{S.gamma=e.target.checked;draw()};$("u").oninput=e=>{S.uw=+e.target.value;draw()};$("t").onchange=e=>{S.target=+e.target.value||21;draw()};
+ if($("hold"))$("hold").oninput=e=>{S.hold=+e.target.value;draw()}}
+draw()}
+</script></body></html>

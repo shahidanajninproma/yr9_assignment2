@@ -1,0 +1,13 @@
+framework,factor,driver,indicator,source_id
+PESTLE,Political,"Government goal of 23 GW under the current Roadmap; 30-40 GW needed by 2040 (July 2025 infrastructure plan); the older 21 GW by end-2032 plan is the dashboard's target.",Gap to target; capacity 2032,rvo_road
+PESTLE,Economic,"Rising construction costs and lower-than-expected electricity demand are stalling development; no applications were received for Nederwiek I-A.",Undated GW; delay years,rvo_road
+PESTLE,Social,"Electrification of industry is lagging, which lowers expected demand for offshore electricity.",Policymaker lens: year target reached,rvo_road
+PESTLE,Technological,"Grid-connection components and platforms are supply-constrained; ~2 GW farms need longer to connect (2024 planning note).",Delay years; zero-build years,rvo_21gw
+PESTLE,Legal,"Two-way contracts (CfD) replace subsidies from 2027; mining companies must apply earlier for permits in wind zones from 2028.",Gamma tender yes/no; delay years,rvo_road
+PESTLE,Environmental,"Ecological research in new search areas is ongoing; space shared with fishing, shipping, mining and helicopter routes.",Undated GW,rvo_road
+Diamond,Factor conditions,"Strong, constant North Sea wind; existing 4.7 GW base.",Offshore capacity (CBS),cbs_cap
+Diamond,Demand conditions,"Domestic demand growth depends on electrification; CfDs shift price risk to government.",Offshore production (CBS); target gap,cbs_prod
+Diamond,Related and supporting industries,"Suppliers of installation, cables and vessels face stepwise demand and component bottlenecks.",MW added per year; busiest year,rvo_21gw
+Diamond,Firm strategy structure and rivalry,"A tender without bids shows developers are price- and risk-sensitive.",Dated vs undated pipeline,rvo_road
+Diamond,Government,"Tender timing, grid delivery and CfD design drive when sites are built.",Delay years; scenario selector,rvo_road
+Diamond,Chance,"External yield studies and cost shocks can shift expectations; the government kept its yield assumptions unchanged.",Sensitivity: sliders,rvo_road

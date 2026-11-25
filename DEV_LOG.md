@@ -1,0 +1,15 @@
+# Development log
+
+| Stage | Issue or feedback | Change made | Prompt / code example | Verification | Effect on quality |
+|---|---|---|---|---|---|
+| 1. Prototype and source check | Brief said CBS dimension field is `EnergySources`; the live API field is `EnergySourcesTechniques`, with a trailing space in codes and periods like `2025JJ00`. RVO 21 GW page is a 2024 plan; the May 2026 Roadmap states 23 GW. | `refresh_data.py` strips codes and parses periods; target made an editable sidebar input; difference documented in README and `sources.csv`. | "Fetch the CBS OData table and verify offshore 2023=4110, 2024=4748, 2025=4748 before building anything." | Values compared with the live API response; dated RVO sites sum to 7.52 GW, so 4.748 + 7.52 = 12.27 GW and ~8.7 GW is needed from undated sites (matches expected finding). | Data traceable to dataset level; avoided a silent wrong field and a stale target. |
+| 2. Model validation and JS parity | Risk that Python and JS give different numbers; risk of hidden model errors. | `tests/test_model.py` (invariants, presets, band widening, holdout); `tests/parity_js.py` compares JS with Python on 40 slider settings, the forecast and 7 holdout years. | "Write tests that fail if cumulative capacity drops, if additions do not sum to the 2032 change, or if JS differs by more than 1e-6." | All tests pass. Presets: 21.07 / 12.27 / 10.27 GW. Holdout (train to 2021): linear MAE 944 MW vs naive 1,584 MW; with train to 2024 the naive benchmark wins, so the trend is not reliably better. | Calculations reproducible; the forecast is honestly framed as a benchmark. |
+| 3. User walkthrough (TEAM TO COMPLETE) | **Not yet done.** The handout requires a test with someone outside the team (or a structured walkthrough). | _Fill in after testing._ | _Fill in: a real prompt used to fix a real problem._ | _Fill in: what you checked after the change._ | _Fill in: what improved and what limitation remains._ |
+
+**Selected corrections of AI output** (add your own): the AI first assumed the CBS field names from the brief; checking the API showed otherwise (stage 1).
+
+## Additional iteration (UI and data reconciliation)
+- **Issue:** a UI reference file (`Netherlands_WindEnergy_Dashboard_v1.html`) showed onshore 2025 = 7,035 MW; our API pull had 7,017.
+- **Check:** the current CBS StatLine page for table 82610 shows 7,035 (onshore), 4,748 (offshore), 11,782 (total) and offshore production 15,905; the earlier OData response was an older revision. Values updated; reconciliation recorded in `sources.csv`, README and the Data tab.
+- **Change:** restyled app and preview to the reference design; added snapshot/source strip on every page, KPI cards, capacity mix, stacked capacity, annual net change, CSV downloads, `run_windows.bat`, Streamlit theme config.
+- **Verification:** model tests (including 2025 total vs CBS 11,782 within rounding), JS/Python parity and headless render of all tabs re-run after the change. `app.py` and `run_windows.bat` could not be executed in the build environment and must be tested by the team.
